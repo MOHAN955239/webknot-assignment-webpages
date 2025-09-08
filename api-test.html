@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Event Management Platform - API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .section h2 {
+            color: #555;
+            margin-top: 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 Campus Event Management Platform</h1>
+        <p style="text-align: center; color: #666;">API Testing Interface</p>
+
+        <div class="section">
+            <h2>📊 System Status</h2>
+            <button onclick="checkStatus()">Check API Status</button>
+            <div id="status-result" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h2>🎪 Events Management</h2>
+            <button onclick="getEvents()">Get All Events</button>
+            <button onclick="createEvent()">Create Sample Event</button>
+            <div id="events-result" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h2>👥 Students Management</h2>
+            <button onclick="getStudents()">Get All Students</button>
+            <button onclick="createStudent()">Create Sample Student</button>
+            <div id="students-result" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h2>📝 Registration & Attendance</h2>
+            <button onclick="getRegistrations()">Get All Registrations</button>
+            <button onclick="registerStudent()">Register Student for Event</button>
+            <button onclick="markAttendance()">Mark Attendance</button>
+            <div id="registration-result" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h2>⭐ Feedback System</h2>
+            <button onclick="getFeedback()">Get All Feedback</button>
+            <button onclick="submitFeedback()">Submit Sample Feedback</button>
+            <div id="feedback-result" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h2>📈 Reports</h2>
+            <button onclick="getEventRegistrations()">Event Registrations</button>
+            <button onclick="getAttendanceReport()">Attendance Report</button>
+            <button onclick="getFeedbackReport()">Feedback Report</button>
+            <button onclick="getPopularEvents()">Popular Events</button>
+            <button onclick="getTopStudents()">Top Students</button>
+            <div id="reports-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000';
+
+        async function makeRequest(url, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+
+                const response = await fetch(url, options);
+                const result = await response.json();
+                
+                return {
+                    success: response.ok,
+                    status: response.status,
+                    data: result
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+
+        function displayResult(elementId, result) {
+            const element = document.getElementById(elementId);
+            if (result.success) {
+                element.innerHTML = `<span class="status success">✓ Success (${result.status})</span>\n${JSON.stringify(result.data, null, 2)}`;
+            } else {
+                element.innerHTML = `<span class="status error">✗ Error</span>\n${result.error || JSON.stringify(result.data, null, 2)}`;
+            }
+        }
+
+        async function checkStatus() {
+            const result = await makeRequest(`${API_BASE}/`);
+            displayResult('status-result', result);
+        }
+
+        async function getEvents() {
+            const result = await makeRequest(`${API_BASE}/events`);
+            displayResult('events-result', result);
+        }
+
+        async function createEvent() {
+            const eventData = {
+                name: "Web Development Workshop",
+                type: "Workshop",
+                date: "2024-12-31 14:00:00",
+                college_id: 1,
+                description: "Learn modern web development techniques"
+            };
+            const result = await makeRequest(`${API_BASE}/events`, 'POST', eventData);
+            displayResult('events-result', result);
+        }
+
+        async function getStudents() {
+            const result = await makeRequest(`${API_BASE}/students`);
+            displayResult('students-result', result);
+        }
+
+        async function createStudent() {
+            const studentData = {
+                name: "Test Student",
+                email: "test.student@example.edu",
+                college_id: 1
+            };
+            const result = await makeRequest(`${API_BASE}/students`, 'POST', studentData);
+            displayResult('students-result', result);
+        }
+
+        async function getRegistrations() {
+            const result = await makeRequest(`${API_BASE}/register`);
+            displayResult('registration-result', result);
+        }
+
+        async function registerStudent() {
+            const registrationData = {
+                student_id: 1,
+                event_id: 1
+            };
+            const result = await makeRequest(`${API_BASE}/register`, 'POST', registrationData);
+            displayResult('registration-result', result);
+        }
+
+        async function markAttendance() {
+            const attendanceData = {
+                registration_id: 1,
+                status: "present"
+            };
+            const result = await makeRequest(`${API_BASE}/attendance`, 'POST', attendanceData);
+            displayResult('registration-result', result);
+        }
+
+        async function getFeedback() {
+            const result = await makeRequest(`${API_BASE}/feedback`);
+            displayResult('feedback-result', result);
+        }
+
+        async function submitFeedback() {
+            const feedbackData = {
+                registration_id: 1,
+                rating: 5,
+                comment: "Excellent event!"
+            };
+            const result = await makeRequest(`${API_BASE}/feedback`, 'POST', feedbackData);
+            displayResult('feedback-result', result);
+        }
+
+        async function getEventRegistrations() {
+            const result = await makeRequest(`${API_BASE}/reports/event-registrations`);
+            displayResult('reports-result', result);
+        }
+
+        async function getAttendanceReport() {
+            const result = await makeRequest(`${API_BASE}/reports/attendance`);
+            displayResult('reports-result', result);
+        }
+
+        async function getFeedbackReport() {
+            const result = await makeRequest(`${API_BASE}/reports/feedback`);
+            displayResult('reports-result', result);
+        }
+
+        async function getPopularEvents() {
+            const result = await makeRequest(`${API_BASE}/reports/popular-events`);
+            displayResult('reports-result', result);
+        }
+
+        async function getTopStudents() {
+            const result = await makeRequest(`${API_BASE}/reports/top-students`);
+            displayResult('reports-result', result);
+        }
+
+        // Auto-check status on page load
+        window.onload = function() {
+            checkStatus();
+        };
+    </script>
+</body>
+</html>
